@@ -1,22 +1,28 @@
 package com.example.oauthfb.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.persistence.Id;
 
-@Entity
+import lombok.Data;
+
+@Data
+@Document(collection = "users")
 public class User {
     @Id
     private String id;
-    private  String name;
+    private String name;
     private String email;
-    public User(String id, String name, String email){
-        this.id=id;
-        this.name=name;
-        this.email=email;
+
+    public User(String id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
     }
-    public  User (){}
+
+    public User() {
+    }
+
     public String getId() {
         return id;
     }
