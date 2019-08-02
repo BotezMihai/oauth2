@@ -1,11 +1,19 @@
 package com.example.oauthfb;
 
+import com.example.oauthfb.entity.User;
+import com.example.oauthfb.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -17,9 +25,25 @@ import java.security.Principal;
 @EnableOAuth2Sso
 @RestController
 public class OauthfbApplication extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private UserService userService;
     @RequestMapping("/user")
     public Principal user(Principal principal) {
-        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = ((OAuth2AuthenticationDetails) authentication.getDetails()).getTokenValue();
+        Facebook fbApi = new FacebookTemplate(token);
+        String [] fields={"first_name", "last_name", "email"};
+        org.springframework.social.facebook.api.User fbUser = fbApi.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
+        if( userService.exists(fbUser.getId()))
+            System.out.println("exista");
+        else {
+            User user = new User(fbUser.getId(), fbUser.getName(), fbUser.getEmail());
+            userService.insertUser(user);
+        }
+            Iterable<User> users=userService.getAllUsers();
+        for (User user: users){
+            System.out.println(user.getEmail());
+        }
         return principal;
     }
     @Override
@@ -31,8 +55,8 @@ public class OauthfbApplication extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .anyRequest()
                 .authenticated()
-                .and().logout().logoutSuccessUrl("/").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll()
-                .and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                .and().logout().logoutSuccessUrl("/").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll().and().csrf().disable();
+               // .and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
     }
     public static void main(String[] args) {
         SpringApplication.run(OauthfbApplication.class, args);
