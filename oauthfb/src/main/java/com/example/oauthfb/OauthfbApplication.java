@@ -23,12 +23,12 @@ import java.util.logging.Logger;
 @SpringBootApplication
 @EnableOAuth2Sso
 @RestController
-public class OauthfbApplication extends WebSecurityConfigurerAdapter {
+public class OauthfbApplication {
     @Autowired
     private UserService userService;
     @Autowired
     private SpringSecurityConfig springSecurityConfig;
-    Logger logger = Logger.getLogger("OauthfbApplication.class");
+   // Logger logger = Logger.getLogger("OauthfbApplication.class");
 
     @RequestMapping("/user")
     public Principal user(Principal principal) {
