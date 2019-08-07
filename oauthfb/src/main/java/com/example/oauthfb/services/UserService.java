@@ -32,6 +32,7 @@ public class UserService {
     public void checkPrincipal(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String token = ((OAuth2AuthenticationDetails) authentication.getDetails()).getTokenValue();
+        logger.info(token);
         Facebook fbApi = new FacebookTemplate(token);
         String[] fields = {"first_name", "last_name", "email", "name"};
         org.springframework.social.facebook.api.User fbUser = fbApi.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);

@@ -13,11 +13,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/", "/login**", "/webjars/**", "/error**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and().logout().logoutSuccessUrl("/").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll().and().csrf().disable();
+                .antMatchers("/", "/login**", "/webjars/**", "/error**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .logout().logoutSuccessUrl("/").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll().and().csrf().disable();
 
     }
 }
