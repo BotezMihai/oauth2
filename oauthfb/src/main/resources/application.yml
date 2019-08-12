@@ -1,19 +1,13 @@
 server:
-  port: 8081
+  port: 8445
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: mypass
+    key-store-type: PKCS12
 
-security:
-  oauth2:
-    client:
-      clientId: 695569147572856
-      clientSecret: 77ce596cdd2fb35346c68594a3775056
-      accessTokenUri: https://graph.facebook.com/oauth/access_token
-      userAuthorizationUri: https://www.facebook.com/dialog/oauth
-      tokenName: oauth_token
-      authenticationScheme: query
-      clientAuthenticationScheme: form
-      scope: public_profile, user_birthday
-    resource:
-      userInfoUri: https://graph.facebook.com/me
+REDIRECT_URI: https://localhost:8445/index.html
+APP_ID: 695569147572856
+APP_SECRET: 77ce596cdd2fb35346c68594a3775056
 
 spring:
   main:
