@@ -1,43 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>Demo</title>
-    <meta name="description" content=""/>
-    <meta name="viewport" content="width=device-width"/>
-    <base href="/"/>
-    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/3.2.0/css/bootstrap.min.css"/>
-    <script type="text/javascript" src="/webjars/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/webjars/jquery/2.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/webjars/js-cookie/2.1.0/js.cookie.js"></script>
+    <meta charset="UTF-8">
+    <title>Facebook login</title>
+
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
 </head>
 <body>
-<h1>Demo</h1>
-<div class="container unauthenticated">
-    With Facebook: <a href="/login">click here</a>
-</div>
-<div class="container authenticated">
-    Logged in as: <span id="user"></span>
-    <div>
-        <button onClick="logout()" class="btn btn-primary">Logout</button>
-    </div>
-</div>
-<script type="text/javascript">
-    $.get("/user", function (data) {
-        $("#user").html(data.userAuthentication.details.name);
-        $(".unauthenticated").hide()
-        $(".authenticated").show()
-    });
-</script>
-<script type="text/javascript">
-    var logout = function () {
-        $.post("/logout", function () {
-            $("#user").html('');
-            $(".unauthenticated").show();
-            $(".authenticated").hide();
+
+
+<a id="login" href="">Login with facebook</a>
+<a id="logout" href="#">Logout</a>
+
+<hr/>
+<pre id="userinfo">
+
+</pre>
+
+<script>
+    var url = window.location.toString();
+    var code = getParameterByName("code", url);
+    var state = getParameterByName("state", url);
+    getLoginButtonUri();
+    function getLoginButtonUri() {
+        $.ajax({
+            url: "/facebook/getLoginUri",
+            success: function (res, status) {
+                $("#login").attr("href", res);
+            }
         })
-        return true;
+    }
+    isAuthenticated();
+    function isAuthenticated() {
+        $.ajax({
+            url: "/facebook/auth",
+            success: function (res, status) {
+                console.log("Authenticated: ", res)
+                if (res === true) {
+                    $("#login").hide();
+                    $("#logout").show();
+                    showUserInfo()
+                }
+                else {
+                    $("#login").show();
+                    $("#logout").hide();
+                }
+            },
+            error: function (res, status) {
+                console.error(res, status)
+            }
+        });
+    }
+    function showUserInfo() {
+        $.ajax({
+            url: "/facebook/userinfo",
+            success: function (res, status) {
+                console.log(res);
+                $("#userinfo").html(JSON.stringify(res, null, 2));
+            }
+        })
+    }
+    $("#logout").click(function () {
+        $.ajax({
+            url: "/facebook/logout",
+            success: function (res, status) {
+                console.log(res)
+                window.location.replace("./")
+            }
+        })
+    });
+    if (code && state) {
+        $.ajax({
+            url: "/facebook/login?code=" + code + "&state=" + state,
+            success: function (res, status) {
+                console.log(status);
+                window.location.replace("./")
+            }
+        });
+    }
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
 </script>
 </body>
