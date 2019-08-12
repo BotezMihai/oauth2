@@ -4,12 +4,14 @@ import com.example.oauthfb.AccessToken;
 import com.example.oauthfb.AccessTokenData;
 import com.example.oauthfb.Data;
 import com.example.oauthfb.UserDetails;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -37,6 +39,7 @@ public class FacebookController {
     private final String REDIRECT_URI;
     private final String APP_ID;
     private final String APP_SECRET;
+
     public FacebookController(
             @Value("${REDIRECT_URI}") String REDIRECT_URI,
             @Value("${APP_ID}") String APP_ID,
@@ -45,6 +48,11 @@ public class FacebookController {
         this.APP_ID = APP_ID;
         this.APP_SECRET = APP_SECRET;
     }
+
+    @Value("${server.ssl.key-store}")
+    String urlSsl;
+    @Value("${server.ssl.key-store-password}")
+    String passSsl;
 
     @GetMapping("/facebook/login")
     public ResponseEntity<?> facebookLogin(@RequestParam("code") String code, @RequestParam("state") String state,
@@ -90,6 +98,7 @@ public class FacebookController {
         httpServletResponse.sendRedirect(REDIRECT_URI);
         return ResponseEntity.ok().build();
     }
+
     @GetMapping("/facebook/auth")
     public boolean isAuthenticated(@CookieValue(value = "access_token", required = false) String access_token) {
         if (access_token == null) {
@@ -97,6 +106,7 @@ public class FacebookController {
         }
         return userIsAuthenticated(access_token);
     }
+
     @GetMapping("/facebook/logout")
     public ResponseEntity logout(@CookieValue(value = "access_token") String access_token,
                                  HttpServletResponse httpServletResponse) {
@@ -107,21 +117,25 @@ public class FacebookController {
         httpServletResponse.addCookie(cookie);
         return ResponseEntity.ok().build();
     }
+
     @GetMapping("/facebook/userinfo")
     public UserDetails getUserDetails(@CookieValue("access_token") String access_token) throws HttpClientErrorException {
-        if(access_token==null)
-        throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
-        return getUserDetailsFromAccessToken(access_token);
+
+
+        return (getUserDetailsFromAccessToken(access_token));
     }
+
     @GetMapping("/facebook/getLoginUri")
     public String getLoginUri() {
         String uri = "https://www.facebook.com/v2.9/dialog/oauth?client_id=" + APP_ID + "&redirect_uri=" + REDIRECT_URI
                 + "&state=" + genCSRF();
         return uri;
     }
+
     private String genCSRF() {
         return UUID.randomUUID().toString();
     }
+
     private boolean userIsAuthenticated(String access_token) {
         AccessTokenData accessTokenData;
         try {
@@ -133,6 +147,7 @@ public class FacebookController {
 
         return !(!accessTokenData.isIs_valid() || accessTokenData.getApp_id() != Long.valueOf(APP_ID));
     }
+
     private AccessToken getAccessTokenFromCode(String code) {
         Map<String, String> urlparams = new HashMap<>();
         urlparams.put("client_id", APP_ID);
@@ -150,6 +165,7 @@ public class FacebookController {
             throw new RuntimeException(String.valueOf(exception.getStatusCode()));
         }
     }
+
     public String getAppAccessToken() {
         Map<String, String> urlparams = new HashMap<>();
         urlparams.put("client_id", APP_ID);
@@ -181,6 +197,7 @@ public class FacebookController {
             throw new RuntimeException(String.valueOf(exception.getStatusCode()));
         }
     }
+
     private UserDetails getUserDetailsFromAccessToken(String accessToken) {
 
         Map<String, String> urlparams = new HashMap<>();
@@ -197,4 +214,5 @@ public class FacebookController {
             //throw new RuntimeException(String.valueOf(404));
         }
     }
+
 }
