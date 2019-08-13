@@ -49,11 +49,6 @@ public class FacebookController {
         this.APP_SECRET = APP_SECRET;
     }
 
-    @Value("${server.ssl.key-store}")
-    String urlSsl;
-    @Value("${server.ssl.key-store-password}")
-    String passSsl;
-
     @GetMapping("/facebook/login")
     public ResponseEntity<?> facebookLogin(@RequestParam("code") String code, @RequestParam("state") String state,
                                            HttpServletResponse httpServletResponse) throws IOException {
@@ -119,10 +114,17 @@ public class FacebookController {
     }
 
     @GetMapping("/facebook/userinfo")
-    public UserDetails getUserDetails(@CookieValue("access_token") String access_token) throws HttpClientErrorException {
+    public ResponseEntity<UserDetails> getUserDetails(@CookieValue(value = "access_token", required = false) String access_token) throws HttpClientErrorException {
+        LOGGER.info("sunt in endpoint" + access_token);
+        if (access_token == null) {
+            UserDetails userDetails = null;
+            LOGGER.info("TOKENUL ESTE NUL");
+            return new ResponseEntity<UserDetails>(userDetails, HttpStatus.UNAUTHORIZED);
 
+        }
 
-        return (getUserDetailsFromAccessToken(access_token));
+        return new ResponseEntity<UserDetails>(getUserDetailsFromAccessToken(access_token), HttpStatus.OK);
+
     }
 
     @GetMapping("/facebook/getLoginUri")
@@ -211,8 +213,6 @@ public class FacebookController {
         } catch (HttpStatusCodeException exception) {
             LOGGER.warn(exception.getResponseBodyAsString());
             throw new RuntimeException(String.valueOf(exception.getStatusCode()));
-            //throw new RuntimeException(String.valueOf(404));
         }
     }
-
 }

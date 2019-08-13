@@ -1,12 +1,10 @@
 package com.example.oauthfb.filters;
 
 
-import org.apache.http.HttpResponse;
+import com.example.oauthfb.controllers.FacebookController;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.resource.HttpResource;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -17,10 +15,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class SimpleFilter implements Filter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFilter.class);
     @Override
     public void destroy() {
     }
@@ -29,19 +29,20 @@ public class SimpleFilter implements Filter {
     public void doFilter
             (ServletRequest request, ServletResponse response, FilterChain filterchain)
             throws IOException, ServletException {
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
-        Cookie cookie[] = req.getCookies();
-        if (cookie != null)
-            filterchain.doFilter(request, response);
-        else {
-            if(req.getRequestURI().equals("/facebook/userinfo"))
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            else
-                filterchain.doFilter(request, response);
-
-
-        }
+//        HttpServletRequest req = (HttpServletRequest) request;
+//        HttpServletResponse resp = (HttpServletResponse) response;
+//        Cookie cookie[] = req.getCookies();
+//        LOGGER.info("SUNT AICI LA INCEPUT");
+//        if (cookie != null)
+//            filterchain.doFilter(request, response);
+//        else {
+//            LOGGER.info("SUNT AICI");
+//            if(req.getRequestURI().equals("/facebook/userinfo"))
+//            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            else
+//                filterchain.doFilter(request, response);
+//        }
+        filterchain.doFilter(request, response);
     }
 
     @Override
