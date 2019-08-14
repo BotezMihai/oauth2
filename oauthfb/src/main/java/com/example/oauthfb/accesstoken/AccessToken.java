@@ -1,4 +1,4 @@
-package com.example.oauthfb;
+package com.example.oauthfb.accesstoken;
 
 public class AccessToken {
     private String access_token;

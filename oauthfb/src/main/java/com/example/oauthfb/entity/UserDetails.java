@@ -1,4 +1,4 @@
-package com.example.oauthfb;
+package com.example.oauthfb.entity;
 
 public class UserDetails {
     private String id;

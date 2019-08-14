@@ -1,7 +1,6 @@
 package com.example.oauthfb.unittests;
 
 import com.example.oauthfb.OauthfbApplication;
-import com.example.oauthfb.UserDetails;
 import com.example.oauthfb.controllers.FacebookController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,13 +28,10 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.oauthfb.services.UserService;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-
 
 import javax.servlet.http.Cookie;
 
@@ -43,7 +40,8 @@ import javax.servlet.http.Cookie;
 @WebMvcTest(FacebookController.class)
 
 public class OauthSecurityTest {
-
+    @Value("${ACCESS_TOKEN}")
+    String access_token;
     @Autowired
     private MockMvc mvc;
 
@@ -87,7 +85,7 @@ public class OauthSecurityTest {
     }
     @Test
     public void givenCookieShouldResponseWith200(){
-        Cookie cookie=new Cookie("access_token","EAAJ4ncZC1MngBACKyA473ZChGtZCHv9YNQUphZAk6CGZBzXBlp5FIKh3gaho1uHmSXGton0eX9LSjmOaRYXC33Q6IwFBvAikrUWW6GUKOksZB3jKTnSxtkpqpNvEdlFbtmZAOBvaFS3Q5IEPEKMUPlgfIlophQtWweX7ZBqsXFk4YwZDZD");
+        Cookie cookie=new Cookie("access_token",access_token);
         try {
        mvc.perform(get("/facebook/userinfo").cookie(cookie).accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk()).andDo(print());

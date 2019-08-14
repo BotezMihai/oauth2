@@ -1,4 +1,6 @@
-package com.example.oauthfb;
+package com.example.oauthfb.accesstoken;
+
+import com.example.oauthfb.accesstoken.AccessTokenData;
 
 public class Data {
     AccessTokenData data;

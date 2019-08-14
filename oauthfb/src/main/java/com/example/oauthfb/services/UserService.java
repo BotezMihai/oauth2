@@ -1,12 +1,11 @@
 package com.example.oauthfb.services;
 
-import com.example.oauthfb.AccessToken;
-import com.example.oauthfb.AccessTokenData;
-import com.example.oauthfb.Data;
-import com.example.oauthfb.UserDetails;
+import com.example.oauthfb.accesstoken.AccessToken;
+import com.example.oauthfb.accesstoken.AccessTokenData;
+import com.example.oauthfb.accesstoken.Data;
+import com.example.oauthfb.entity.UserDetails;
 
 import com.example.oauthfb.controllers.FacebookController;
-import com.example.oauthfb.entity.User;
 import com.example.oauthfb.interfaces.UserRepository;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,11 +31,11 @@ public class UserService {
         return userRepository.findById(id).isPresent();
     }
 
-    public void insertUser(User user) {
+    public void insertUser(UserDetails user) {
         this.userRepository.save(user);
     }
 
-    public Iterable<User> getAllUsers() {
+    public Iterable<UserDetails> getAllUsers() {
         return userRepository.findAll();
     }
     public String genCSRF() {

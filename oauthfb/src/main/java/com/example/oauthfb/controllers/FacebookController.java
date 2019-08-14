@@ -1,9 +1,9 @@
 package com.example.oauthfb.controllers;
 
-import com.example.oauthfb.AccessToken;
-import com.example.oauthfb.AccessTokenData;
+import com.example.oauthfb.accesstoken.AccessToken;
+import com.example.oauthfb.accesstoken.AccessTokenData;
 
-import com.example.oauthfb.UserDetails;
+import com.example.oauthfb.entity.UserDetails;
 
 import com.example.oauthfb.services.UserService;
 import org.slf4j.Logger;
@@ -78,6 +78,12 @@ public class FacebookController {
         UserDetails userDetails;
         try {
             userDetails = userService.getUserDetailsFromAccessToken(accessToken.getAccess_token());
+            if(userService.exists(userDetails.getId()))
+            LOGGER.info("Userul exista cu id ul "+userDetails.getId());
+            else
+            {
+                userService.insertUser(userDetails);
+            }
         } catch (RuntimeException e) {
             return ResponseEntity.status(Integer.parseInt(e.getMessage())).build();
         }
