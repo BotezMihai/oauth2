@@ -6,11 +6,18 @@ import com.example.oauthfb.accesstoken.AccessTokenData;
 import com.example.oauthfb.entity.UserDetails;
 
 import com.example.oauthfb.services.UserService;
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+//import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -25,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 
@@ -50,7 +58,7 @@ public class FacebookController {
 
     @GetMapping("/facebook/login")
     public ResponseEntity<?> facebookLogin(@RequestParam("code") String code, @RequestParam("state") String state,
-                                           HttpServletResponse httpServletResponse) throws IOException {
+                                           HttpServletResponse httpServletResponse, HttpSession httpSession) throws IOException {
         // Optional: Verify state (csrf) token
 
         AccessToken accessToken;
@@ -89,7 +97,7 @@ public class FacebookController {
         }
 
         LOGGER.info("User is authenticated: {}", userDetails);
-
+        httpSession.setAttribute("email",userDetails.getEmail());
         Cookie cookie = new Cookie("access_token", accessToken.getAccess_token());
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
@@ -119,7 +127,7 @@ public class FacebookController {
     }
 
     @GetMapping("/facebook/userinfo")
-    public ResponseEntity<UserDetails> getUserDetails(@CookieValue(value = "access_token", required = false) String access_token) throws HttpClientErrorException {
+    public ResponseEntity<UserDetails> getUserDetails(@CookieValue(value = "access_token", required = false) String access_token,HttpSession httpSession) throws HttpClientErrorException {
         LOGGER.info("sunt in endpoint" + access_token);
         if (access_token == null) {
             UserDetails userDetails = null;
@@ -127,7 +135,7 @@ public class FacebookController {
             return new ResponseEntity<UserDetails>(userDetails, HttpStatus.UNAUTHORIZED);
 
         }
-
+        LOGGER.info((String)httpSession.getAttribute("email"));
         return new ResponseEntity<UserDetails>(userService.getUserDetailsFromAccessToken(access_token), HttpStatus.OK);
 
     }
@@ -139,5 +147,12 @@ public class FacebookController {
                 + "&state=" + userService.genCSRF();
         return uri;
     }
+
+    @GetMapping("/check-token")
+    public String getUser(HttpSession httpSession){
+        return "test";
+    }
+
+
 
 }
