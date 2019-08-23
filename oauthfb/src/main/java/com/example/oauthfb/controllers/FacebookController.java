@@ -139,5 +139,10 @@ public class FacebookController {
                 + "&state=" + userService.genCSRF();
         return uri;
     }
+    @GetMapping("/check-token")
+    public String test(){
 
+        return "test";
+
+    }
 }
