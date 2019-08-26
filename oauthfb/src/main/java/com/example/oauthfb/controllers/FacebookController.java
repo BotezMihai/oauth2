@@ -3,6 +3,7 @@ package com.example.oauthfb.controllers;
 import com.example.oauthfb.accesstoken.AccessToken;
 import com.example.oauthfb.accesstoken.AccessTokenData;
 
+import com.example.oauthfb.entity.TokenTable;
 import com.example.oauthfb.entity.UserDetails;
 
 import com.example.oauthfb.services.UserService;
@@ -14,11 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
 import org.springframework.web.client.RestTemplate;
@@ -39,6 +37,7 @@ public class FacebookController {
     public final String APP_SECRET;
     @Autowired
     private UserService userService;
+
     public FacebookController(
             @Value("${REDIRECT_URI}") String REDIRECT_URI,
             @Value("${APP_ID}") String APP_ID,
@@ -84,6 +83,10 @@ public class FacebookController {
             {
                 userService.insertUser(userDetails);
             }
+
+            TokenTable tokenTable=new TokenTable(userService.getNextSequence("accessToken"),accessToken.getAccess_token(),userDetails.getId());
+            userService.insertToken(tokenTable);
+
         } catch (RuntimeException e) {
             return ResponseEntity.status(Integer.parseInt(e.getMessage())).build();
         }
@@ -139,10 +142,12 @@ public class FacebookController {
                 + "&state=" + userService.genCSRF();
         return uri;
     }
-    @GetMapping("/check-token")
-    public String test(){
 
+    @RequestMapping(value="/check-token", method = RequestMethod.POST)
+    public String test(@RequestBody String accessToken){
+
+    if(userService.existsToken(accessToken))
+        LOGGER.info("este in bd");
         return "test";
-
     }
 }

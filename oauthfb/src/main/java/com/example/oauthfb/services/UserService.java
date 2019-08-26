@@ -3,17 +3,27 @@ package com.example.oauthfb.services;
 import com.example.oauthfb.accesstoken.AccessToken;
 import com.example.oauthfb.accesstoken.AccessTokenData;
 import com.example.oauthfb.accesstoken.Data;
+import com.example.oauthfb.entity.Counter;
+import com.example.oauthfb.entity.TokenTable;
 import com.example.oauthfb.entity.UserDetails;
 
 import com.example.oauthfb.controllers.FacebookController;
+import com.example.oauthfb.interfaces.TokenRepository;
 import com.example.oauthfb.interfaces.UserRepository;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+
+import static org.springframework.data.mongodb.core.query.Query.*;
+import static org.springframework.data.mongodb.core.query.Criteria.*;
+import static org.springframework.data.mongodb.core.FindAndModifyOptions.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,21 +33,36 @@ import java.util.UUID;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
+    @Autowired
+    private MongoOperations mongo;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private FacebookController facebookController;
+
     public boolean exists(String id) {
         return userRepository.findById(id).isPresent();
+    }
+
+    public boolean existsToken(String token) {
+        return tokenRepository.existsTokenTableByAccessToken(token);
     }
 
     public void insertUser(UserDetails user) {
         this.userRepository.save(user);
     }
 
+    public void insertToken(TokenTable tokenTable) {
+        this.tokenRepository.save(tokenTable);
+        LOGGER.info("token saved succesfully");
+    }
+
     public Iterable<UserDetails> getAllUsers() {
         return userRepository.findAll();
     }
+
     public String genCSRF() {
         return UUID.randomUUID().toString();
     }
@@ -120,4 +145,15 @@ public class UserService {
         }
     }
 
+    public int getNextSequence(String collectionName) {
+
+        Counter counter = mongo.findAndModify(
+                query(where("_id").is(collectionName)),
+                new Update().inc("seq", 1),
+                options().returnNew(true),
+                Counter.class);
+        return counter.getSeq();
+
+
+    }
 }
