@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-
 @RestController
 public class FacebookController {
     private static final Logger LOGGER = LoggerFactory.getLogger(FacebookController.class);
@@ -77,14 +76,13 @@ public class FacebookController {
         UserDetails userDetails;
         try {
             userDetails = userService.getUserDetailsFromAccessToken(accessToken.getAccess_token());
-            if(userService.exists(userDetails.getId()))
-            LOGGER.info("Userul exista cu id ul "+userDetails.getId());
-            else
-            {
+            if (userService.exists(userDetails.getId()))
+                LOGGER.info("Userul exista cu id ul " + userDetails.getId());
+            else {
                 userService.insertUser(userDetails);
             }
 
-            TokenTable tokenTable=new TokenTable(userService.getNextSequence("accessToken"),accessToken.getAccess_token(),userDetails.getId());
+            TokenTable tokenTable = new TokenTable(userService.getNextSequence("accessToken"), accessToken.getAccess_token(), userDetails.getId());
             userService.insertToken(tokenTable);
 
         } catch (RuntimeException e) {
@@ -143,11 +141,21 @@ public class FacebookController {
         return uri;
     }
 
-    @RequestMapping(value="/check-token", method = RequestMethod.POST)
-    public String test(@RequestBody String accessToken){
-
-    if(userService.existsToken(accessToken))
-        LOGGER.info("este in bd");
-        return "test";
+    @RequestMapping(value = "/check-token", method = RequestMethod.GET)
+    public ResponseEntity<?> test(@RequestHeader(value = "Authorization") String token) {
+        String tokenWithoutBearer = token.substring(7);
+        LOGGER.info("tokenul este" + tokenWithoutBearer);
+        if (userService.existsToken(tokenWithoutBearer)) {
+            LOGGER.info("este in bd");
+            String id = userService.getUserId(tokenWithoutBearer);
+            String email = userService.getUser(id);
+            LOGGER.info("adresa de email este: " + email);
+            LOGGER.info(userService.getUser(id));
+            return new ResponseEntity<>(email, HttpStatus.OK);
+        }
+        LOGGER.info("sunt in check-token");
+        LOGGER.info(token);
+        return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
     }
+
 }

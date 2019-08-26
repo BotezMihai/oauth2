@@ -7,4 +7,5 @@ import javax.persistence.Id;
 
 public interface TokenRepository extends MongoRepository<TokenTable, Integer> {
  boolean existsTokenTableByAccessToken(String accessToken);
+ TokenTable findTokenTableByAccessToken (String id);
 }

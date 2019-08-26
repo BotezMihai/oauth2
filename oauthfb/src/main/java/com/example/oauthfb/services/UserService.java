@@ -54,6 +54,18 @@ public class UserService {
         this.userRepository.save(user);
     }
 
+    public String getUser(String id) {
+
+        UserDetails userDetails=this.userRepository.findById(id).get();
+        return userDetails.getEmail();
+    }
+
+    public String getUserId(String token) {
+
+        TokenTable tokenTable=this.tokenRepository.findTokenTableByAccessToken(token);
+        return tokenTable.getUserId();
+    }
+
     public void insertToken(TokenTable tokenTable) {
         this.tokenRepository.save(tokenTable);
         LOGGER.info("token saved succesfully");
