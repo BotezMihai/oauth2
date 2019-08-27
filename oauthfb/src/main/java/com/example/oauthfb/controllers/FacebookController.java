@@ -130,7 +130,6 @@ public class FacebookController {
         }
 
         return new ResponseEntity<UserDetails>(userService.getUserDetailsFromAccessToken(access_token), HttpStatus.OK);
-
     }
 
     @GetMapping("/facebook/getLoginUri")
